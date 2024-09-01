@@ -5,11 +5,12 @@ import { useState } from "react";
 
 export default function Home() {
 
-  const [file, setFile] = useState();
+  const [file, setFile] = useState<null | any>();
+  
   function onFileChange(e: any){
-    const fileInput = e.target.files;
+    // const fileInput = e.target.files;
     // console.log(fileInput)
-    setFile(e.target.files[0]);
+    setFile(e.target.files);
   }
 
   async function handleSubmit(e: any){
@@ -20,16 +21,34 @@ export default function Home() {
       const formData = new FormData();
 
       // Update the formData object
-      formData.append("myFile", file);
+      // @ts-ignore 
+      for(let i = 0; i < file.length; i++){
+        formData.append("myFile", file[i]);
+      }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_LOCALHOST_BASE_URL}/query`, {
         method: "POST",
         body: formData
       });
 
-      const data = await res.json();
-      alert(data.message);
+      download(res);
+  }
 
+  async function download(res: any){
+      // Get the CSV file from the response
+      const blob = await res.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'results.csv'; // Suggested filename
+      document.body.appendChild(a);
+      a.click(); // Trigger download
+      document.body.removeChild(a); // Clean up
+
+      // Revoke the object URL after download
+      window.URL.revokeObjectURL(url);
   }
 
   return (
@@ -76,4 +95,5 @@ export default function Home() {
       <Footer />
     </>
   );
+
 }

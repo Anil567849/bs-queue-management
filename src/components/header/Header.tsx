@@ -46,7 +46,7 @@ export default async function Header() {
               <div className="flex space-x-4">
                 {navigation.map((item, index) => (
                   <Link
-                    key={item.name}
+                    key={index}
                     href={item.href}
                     aria-current={item.current ? 'page' : undefined}
                     className={classNames(
@@ -82,7 +82,7 @@ export default async function Header() {
                 {session && menuNavigation.map((item, index) => {
                         return <MenuItem>
                         <Link 
-                        key={item.name}
+                        key={index}
                         href={item.href} 
                         className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100"
                         >
@@ -104,9 +104,9 @@ export default async function Header() {
 
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
-          {navigation.map((item) => (
+          {navigation.map((item, index) => (
             <DisclosureButton
-              key={item.name}
+              key={index}
               as="a"
               href={item.href}
               aria-current={item.current ? 'page' : undefined}

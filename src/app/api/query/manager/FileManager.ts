@@ -18,6 +18,17 @@ export class FileManager {
     static async getMarks(text: string){
         return await askGPT(text);
     }
+
+    static convertToCSV(array: { name: string; marks: number }[]): string {
+        // Header for the CSV file
+        const header = 'Sno,Name,Roll No.,Total Marks,Marks Obtained,Percentage\n';
+        
+        // Mapping each object to a CSV row
+        const rows = array.map((obj, index) => `${index+1},${obj.name},${index+11},100,${obj.marks},${(obj.marks/100)*100}`).join('\n');
+    
+        // Combine header and rows
+        return header + rows;
+    }
     
 }
 
