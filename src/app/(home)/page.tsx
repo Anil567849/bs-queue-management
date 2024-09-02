@@ -30,11 +30,12 @@ export default function Home() {
         method: "POST",
         body: formData
       });
-
-      download(res);
+      // const r = await res.json();
+      // console.log(r);
+      // downloadCSV(res);
   }
 
-  async function download(res: any){
+  async function downloadCSV(res: any){
       // Get the CSV file from the response
       const blob = await res.blob();
 
@@ -62,7 +63,8 @@ export default function Home() {
           <form onSubmit={handleSubmit} className=""> 
             <label className="block border border-gray-300 shadow-md rounded-lg" >
               <span className="sr-only">Choose profile photo</span>
-              <input type="file" className="block w-full text-sm text-gray-500
+              <input type="file" 
+                className="block w-full text-sm text-gray-500
                 file:me-4 file:py-2 file:px-4
                 file:rounded-lg file:border-0
                 file:text-sm file:font-semibold
@@ -71,6 +73,7 @@ export default function Home() {
                 file:disabled:opacity-50 file:disabled:pointer-events-none
                 cursor-pointer
               "
+                accept=".txt,.png"
                 onChange={onFileChange}
                 multiple
               />

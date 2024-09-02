@@ -15,8 +15,22 @@ export class FileManager {
         }
     }
 
-    static async getMarks(text: string){
-        return await askGPT(text);
+    static async getMarksFromText(text: string){
+        return await askGPT_Text(text);
+    }
+
+    static async getBase64Encoded(file: File) {
+        try {
+            // Read the file as a Buffer, then convert to string
+            const buffer = Buffer.from(await file.arrayBuffer());
+            return buffer.toString('base64');
+        } catch (error) {
+            throw new Error('Error reading the image file: ');
+        }
+    }
+
+    static async getMarksFromVision(text: string){
+        return await askGPT_Vision(text);
     }
 
     static convertToCSV(array: { name: string; marks: number }[]): string {
@@ -32,7 +46,7 @@ export class FileManager {
     
 }
 
-async function askGPT(text: string){
+async function askGPT_Text(text: string){
     /*
     // TODO:  try to use Batch API - below is not Batch API
     const completion = await openai.chat.completions.create({
@@ -45,6 +59,36 @@ async function askGPT(text: string){
             },
         ],
     });
+    if(!completion.choices[0].message.content) return 0;
+    const res: number = parseInt(completion.choices[0].message.content);
+    console.log(res);
+    return res;
+    */
+    return Math.round(Math.random()*100);
+}
+
+async function askGPT_Vision(base64_image: string){
+    /*
+    // TODO:  try to use Batch API - below is not Batch API
+    const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+            role: "user",
+            content: [
+                {
+                    type: "text",
+                    text: "Read the text on image carefully and return marks out of 100"
+                },
+                {
+                    type: "image_url",
+                    image_url: {
+                        url: `data:image/jpeg;base64,${base64_image}`
+                    }
+                }
+            ]
+        }]
+    });
+
     if(!completion.choices[0].message.content) return 0;
     const res: number = parseInt(completion.choices[0].message.content);
     console.log(res);
