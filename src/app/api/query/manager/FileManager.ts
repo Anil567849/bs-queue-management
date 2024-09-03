@@ -1,4 +1,8 @@
+import { authOptions } from "@/lib/auth/authOptions";
+import connectDB from "@/lib/db/db";
+import Result, { IResult, YearSemester } from "@/lib/db/models/resultSchema";
 import { vision_instruction } from "@/lib/gpt/instruction";
+import { getServerSession } from "next-auth";
 import OpenAI from "openai";
 const openai = new OpenAI({
     apiKey: process.env.OPENAIAPIKEY,
@@ -89,21 +93,252 @@ async function askGPT_Vision(base64_image: string){
             ]
         }]
     });
-
-    // Output: completion.choices[0].message.content
-    // {
-        // "school_code": null,
-        // "school_name": "COMMON SCHOOL EXAMINATION",
-        // "exam_name": null,
-        // "exam_date": "03-sept-2024",
-        // "student_name": null,
-        // "roll_no": "58745",
-        // "class": "10th",
-        // "section": "B",
-        // "total_marks": "85",
-        // "marks_obtained": "51/85"
-    // }
 */
+    /*
+    // Output: completion.choices[0].message.content
+    const output = {
+        school_code: "2695",
+        school_name: "COMMON SCHOOL EXAMINATION",
+        exam_name: "English",
+        exam_date: "03-sept-2024",
+        student_name: "Albert",
+        roll_no: "58745",
+        class: "10th",
+        section: "B",
+        total_marks: "85",
+        marks_obtained: "51/85"
+    }
+    */
+    const output = {
+        exam_name: "English",
+        exam_date: "03-sept-2024",
+        student_name: "Albert",
+        roll_no: "747474",
+        class: "10th",
+        section: "B",
+        total_marks: "85",
+        marks_obtained: "51/85"
+    }
+
+
+    const session = await getServerSession(authOptions);
+    
+    // @ts-ignore 
+    const email = session.user.email;
+    if(!email){
+        return;
+    }
+
+    await connectDB();
+    const yes = await Result.findOne({examiner_email: email});
+
+    if(!yes){
+        await createResult(email, "JULY-2024", output);
+    }else{
+        await upsertResult(yes, "JULY-2024", output);
+    }
+    
     return Math.round(Math.random()*100);
 }
 
+interface IData {
+    exam_name: string,
+    exam_date: string,
+    student_name: string,
+    roll_no: string,
+    class: string,
+    section: string,
+    total_marks: string,
+    marks_obtained: string,
+}
+
+async function createResult(email: string, yearSemester: string, output: IData) {
+    try {
+        // Create a new result document
+        const result = new Result({
+            examiner_email: email,
+            year_semester: [
+                {
+                    year_semester: yearSemester,
+                    class: [
+                        {
+                            class:  output.class,
+                            section: [
+                                {
+                                    section: output.section,
+                                    roll_no: [
+                                        {
+                                            roll_no: output.roll_no,
+                                            student_name: output.student_name,
+                                            exams: [
+                                                {
+                                                    exam: output.exam_name,
+                                                    total_marks: output.total_marks,
+                                                    marks_obtained: output.marks_obtained,
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            userAdded: new Date() // This will be automatically set to the current date
+        });
+
+        // Save the result document to the database
+        await result.save();
+    } catch (error) {
+        console.error('Error saving result:', error);
+    }
+}
+
+async function upsertResult(existingResult: IResult, yearSemester: string, output: IData) {
+    try {
+        // Find the index of the year-semester
+        let yearSemesterIndex = existingResult.year_semester.findIndex(ys => ys.year_semester === yearSemester);
+        
+        if (yearSemesterIndex === -1) {
+            // Year-Semester does not exist, insert it
+            existingResult.year_semester.push({
+                year_semester: yearSemester,
+                class: [
+                    {
+                        class:  output.class,
+                        section: [
+                            {
+                                section: output.section,
+                                roll_no: [
+                                    {
+                                        roll_no: output.roll_no,
+                                        student_name: output.student_name,
+                                        exams: [
+                                            {
+                                                exam: output.exam_name,
+                                                total_marks: output.total_marks,
+                                                marks_obtained: output.marks_obtained,
+                                                added: new Date(),
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            });
+            return;
+        }else{
+
+            const yearSemesterEntry = existingResult.year_semester[yearSemesterIndex];
+
+            // Check if the class exists
+            let classIndex = yearSemesterEntry.class.findIndex(cls => cls.class === output.class);
+
+            if (classIndex === -1) {
+                // Class does not exist, insert it
+                yearSemesterEntry.class.push({
+                    class: output.class,
+                    section: [
+                        {
+                            section: output.section,
+                            roll_no: [
+                                {
+                                    roll_no: output.roll_no,
+                                    student_name: output.student_name,
+                                    exams: [
+                                        {
+                                            exam: output.exam_name,
+                                            total_marks: output.total_marks,
+                                            marks_obtained: output.marks_obtained,
+                                            added: new Date(),
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                });
+                return;
+            }else{
+
+                const classEntry = yearSemesterEntry.class[classIndex];
+
+                // Check if the section exists
+                let sectionIndex = classEntry.section.findIndex(sec => sec.section === output.section);
+
+                if (sectionIndex === -1) {
+                    // Section does not exist, insert it
+                    classEntry.section.push({
+                        section: output.section,
+                        roll_no: [
+                            {
+                                roll_no: output.roll_no,
+                                student_name: output.student_name,
+                                exams: [
+                                    {
+                                        exam: output.exam_name,
+                                        total_marks: output.total_marks,
+                                        marks_obtained: output.marks_obtained,
+                                        added: new Date(),
+                                    }
+                                ]
+                            }
+                        ]
+                    });
+                    return;
+                }else{
+
+                    const sectionEntry = classEntry.section[sectionIndex];
+
+                    // Check if the roll number exists
+                    let rollNoIndex = sectionEntry.roll_no.findIndex(rn => rn.roll_no === output.roll_no);
+
+                    if (rollNoIndex === -1) {
+                        // Roll number does not exist, insert it
+                        sectionEntry.roll_no.push({
+                            roll_no: output.roll_no,
+                            student_name: output.student_name,
+                            exams: [{
+                                exam: output.exam_name,
+                                total_marks: output.total_marks,
+                                marks_obtained: output.marks_obtained,
+                                added: new Date()
+                            }]
+                        });
+                    } else {
+                        // Roll number exists, update the exams array
+                        const rollNoEntry = sectionEntry.roll_no[rollNoIndex];
+                        const examIndex = rollNoEntry.exams.findIndex(exam => exam.exam === output.exam_name);
+
+                        if (examIndex === -1) {
+                            // Exam does not exist, insert it
+                            rollNoEntry.exams.push({
+                                exam: output.exam_name,
+                                total_marks: output.total_marks,
+                                marks_obtained: output.marks_obtained,
+                                added: new Date()
+                            });
+                        } else {
+                            // Exam exists, update it
+                            rollNoEntry.exams[examIndex] = {
+                                exam: output.exam_name,
+                                total_marks: output.total_marks,
+                                marks_obtained: output.marks_obtained,
+                                added: new Date()
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        // Save the updated document
+        await existingResult.save();
+
+    } catch (error) {
+        console.error('Error in upsert operation:', error);
+    }
+}
