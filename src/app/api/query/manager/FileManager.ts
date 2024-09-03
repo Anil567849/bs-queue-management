@@ -1,3 +1,4 @@
+import { vision_instruction } from "@/lib/gpt/instruction";
 import OpenAI from "openai";
 const openai = new OpenAI({
     apiKey: process.env.OPENAIAPIKEY,
@@ -68,16 +69,16 @@ async function askGPT_Text(text: string){
 }
 
 async function askGPT_Vision(base64_image: string){
-    /*
-    // TODO:  try to use Batch API - below is not Batch API
+   
+/*
     const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [{
             role: "user",
             content: [
                 {
                     type: "text",
-                    text: "Read the text on image carefully and return marks out of 100"
+                    text: vision_instruction
                 },
                 {
                     type: "image_url",
@@ -89,11 +90,20 @@ async function askGPT_Vision(base64_image: string){
         }]
     });
 
-    if(!completion.choices[0].message.content) return 0;
-    const res: number = parseInt(completion.choices[0].message.content);
-    console.log(res);
-    return res;
-    */
+    // Output: completion.choices[0].message.content
+    // {
+        // "school_code": null,
+        // "school_name": "COMMON SCHOOL EXAMINATION",
+        // "exam_name": null,
+        // "exam_date": "03-sept-2024",
+        // "student_name": null,
+        // "roll_no": "58745",
+        // "class": "10th",
+        // "section": "B",
+        // "total_marks": "85",
+        // "marks_obtained": "51/85"
+    // }
+*/
     return Math.round(Math.random()*100);
 }
 
