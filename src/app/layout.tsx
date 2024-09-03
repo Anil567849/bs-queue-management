@@ -5,6 +5,8 @@ import Header from "@/components/header/Header";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/authOptions";
 import AuthProvider from "@/providers/AuthProvider";
+import "@/lib/db/db";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
