@@ -7,4 +7,8 @@
 
 ![6](https://github.com/user-attachments/assets/beb79b1c-1803-491f-b0f7-582ea258871f)
 
+## Admin Panel
 
+![1](https://github.com/user-attachments/assets/8878bcca-164b-4b96-8254-32d95b78be3f)
+
+![2](https://github.com/user-attachments/assets/a02c52bd-1c68-4019-ad29-1fc8b05622c1)
