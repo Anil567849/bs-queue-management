@@ -109,8 +109,9 @@ async function askGPT_Vision(base64_image: string){
         marks_obtained: "51/85"
     }
     */
+    /*
     const output = {
-        exam_name: "English",
+        exam_name: "EnglishEnglish",
         exam_date: "03-sept-2024",
         student_name: "Albert",
         roll_no: "747474",
@@ -137,7 +138,7 @@ async function askGPT_Vision(base64_image: string){
     }else{
         await upsertResult(yes, "JULY-2024", output);
     }
-    
+    */
     return Math.round(Math.random()*100);
 }
 

@@ -8,9 +8,11 @@ import { authOptions } from '@/lib/auth/authOptions'
 
 const navigation = [
   { name: 'Home', href: '/', current: true },
+  { name: 'Admin', href: '/admin', current: true },
 ]
 const menuNavigation = [
   { name: 'Home', href: '/', current: true },
+  { name: 'Admin', href: '/admin', current: true },
 ]
 
 function classNames(...classes: string[]) {
