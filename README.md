@@ -1,7 +1,8 @@
 
-# Instantly Evaluate Answer Sheet In a Second with AI (100% Accuracy)
+# Queue Management
 
-![Screenshot 2024-09-01 165010](https://github.com/user-attachments/assets/5a6721ee-a88a-4071-b5cf-6bf70302e140)
+![3](https://github.com/user-attachments/assets/8eb16353-ea2f-4e6d-84ff-01d5db4b3ada)
+
 
 ## Auth System
 
@@ -9,6 +10,6 @@
 
 ## Admin Panel
 
-![1](https://github.com/user-attachments/assets/8878bcca-164b-4b96-8254-32d95b78be3f)
+![1](https://github.com/user-attachments/assets/212652e4-5d0b-4faf-a2c1-e0b6e623f95e)
 
-![2](https://github.com/user-attachments/assets/a02c52bd-1c68-4019-ad29-1fc8b05622c1)
+![2](https://github.com/user-attachments/assets/49f082b0-e97b-4357-a367-006422626a57)
