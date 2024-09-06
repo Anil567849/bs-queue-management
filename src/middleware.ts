@@ -5,6 +5,7 @@ export default withAuth({
         authorized: ({ token, req }) => {
             if(token) return true;
             return false;
+            // return true;
         },
     },
 });

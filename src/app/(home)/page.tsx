@@ -1,99 +1,112 @@
 'use client';
 import Footer from "@/components/footer/Footer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Card from "./components/card";
+import { socket } from "../../socket";
 
+const list = [
+  {
+    title: "Veer Clinic",
+    img: "https://plus.unsplash.com/premium_photo-1661764878654-3d0fc2eefcca?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    waiting: 234,
+  },
+  {
+    title: "Reena & sons Clinic",
+    img: "https://plus.unsplash.com/premium_photo-1658506671316-0b293df7c72b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    waiting: 43,
+  },
+  {
+    title: "Salman Hair Saloon",
+    img: "https://plus.unsplash.com/premium_photo-1661381038438-a1eb0348be72?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    waiting: 23,
+  },
+  {
+    title: "New Hair Dresser",
+    img: "https://images.unsplash.com/photo-1529434173292-b6709e2fe899?q=80&w=1376&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    waiting: 65,
+  },
+  {
+    title: "Rani Tailor",
+    img: "https://images.unsplash.com/photo-1623578059518-bbdb071eab81?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHRheWxvcnxlbnwwfHwwfHx8MA%3D%3D",
+    waiting: 34,
+  },
+  {
+    title: "Taza Sabzi Wala",
+    img: "https://images.unsplash.com/photo-1516594798947-e65505dbb29d?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    waiting: 534,
+  },
+  {
+    title: "Ram Vegitables",
+    img: "https://plus.unsplash.com/premium_photo-1686878940830-9031355ec98c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8Z3JvY2VyeXxlbnwwfHwwfHx8MA%3D%3D",
+    waiting: 23,
+  },
+  {
+    title: "Sharma Mall",
+    img: "https://plus.unsplash.com/premium_photo-1661381007965-b21e0fb0681b?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    waiting: 2,
+  },
+];
 
 export default function Home() {
 
-  const [file, setFile] = useState<null | any>();
-  
-  function onFileChange(e: any){
-    // const fileInput = e.target.files;
-    // console.log(fileInput)
-    setFile(e.target.files);
-  }
+  // ToDo: fetch data online 
+  const [isConnected, setIsConnected] = useState(false);
+  const [rooms, setRooms] = useState([]);
 
-  async function handleSubmit(e: any){
-      e.preventDefault();
-      if(!file) return;
+  useEffect(() => {
+    if (socket.connected) {
+      onConnect();
+    }
 
-      // Create an object of formData
-      const formData = new FormData();
+    function onConnect() {
+      setIsConnected(true);
+      console.log('user connected');
+      
+      socket.emit("get-rooms", "user")
 
-      // Update the formData object
-      // @ts-ignore 
-      for(let i = 0; i < file.length; i++){
-        formData.append("myFile", file[i]);
-      }
+      socket.on("rooms", (val) => {
+        setRooms(val);
+        console.log(val);
+      })
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_LOCALHOST_BASE_URL}/query`, {
-        method: "POST",
-        body: formData
-      });
-      // const r = await res.json();
-      // console.log(r);
-      // downloadCSV(res);
-  }
+      socket.on("room-update", (val) => {
+        setRooms(val);
+        console.log(val);
+      })
 
-  async function downloadCSV(res: any){
-      // Get the CSV file from the response
-      const blob = await res.blob();
 
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'results.csv'; // Suggested filename
-      document.body.appendChild(a);
-      a.click(); // Trigger download
-      document.body.removeChild(a); // Clean up
 
-      // Revoke the object URL after download
-      window.URL.revokeObjectURL(url);
-  }
+      
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
+  }, []);
+
 
   return (
     <>
-      <main className="flex min-h-[90vh] flex-col items-center justify-center">
-        <div className="w-[70vw] pb-5 text-center">
-          <h1 className="pb-5 text-5xl font-bold leading-[120%]">Instantly Evaluate <span className="text-blue-800">Answer Sheet</span> In a Second <span className="text-blue-800">with AI</span> for 100% Accuracy</h1>
+      <main className="flex min-h-[90vh] flex-col items-center justify-start pt-5">
+        <div className="w-[40vw] pb-5 text-center">
+          <h1 className="pb-5 text-4xl font-bold leading-[120%]">Check Waiting List of <span className="text-blue-800">Nearby Shops</span> In a Second</h1>
         </div>
 
-        <div className="w-[30vw] pb-5 text-center">
-          <form onSubmit={handleSubmit} className=""> 
-            <label className="block border border-gray-300 shadow-md rounded-lg" >
-              <span className="sr-only">Choose profile photo</span>
-              <input type="file" 
-                className="block w-full text-sm text-gray-500
-                file:me-4 file:py-2 file:px-4
-                file:rounded-lg file:border-0
-                file:text-sm file:font-semibold
-                file:bg-green-600 file:text-white
-                hover:file:bg-green-700
-                file:disabled:opacity-50 file:disabled:pointer-events-none
-                cursor-pointer
-              "
-                accept=".txt,.png"
-                onChange={onFileChange}
-                multiple
-              />
-              
-              </label>
-              <button 
-              type="submit"
-              className="inline w-full
-                me-4 py-2 px-4
-                rounded-lg border-0
-                text-sm font-semibold
-              bg-green-600 text-white
-                hover:bg-green-700
-                disabled:opacity-50 disabled:pointer-events-none
-                cursor-pointer mt-2"
-              >Submit</button>
-          </form>
+        <div className="w-[70vw] pb-5 text-center gap-5 grid grid-cols-2 sm:grid-cols-4">
+          {
+            rooms.map((item: any) => {
+              return <Card key={item.title} title={item.title} img={item.img} waiting={item.waiting}/>
+            })
+          }
         </div>
-          
-
       </main>
       <Footer />
     </>
